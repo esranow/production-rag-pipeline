@@ -17,7 +17,8 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 8000
 
-    # Google Gemini & LLM Provider (Loaded securely from .env or environment variables)
+    # Google Gemini & LLM Provider
+    # Prioritizes os.environ, then Streamlit Cloud secrets, then None
     GEMINI_API_KEY: Optional[str] = None
     GOOGLE_API_KEY: Optional[str] = None
     OPENAI_API_KEY: Optional[str] = None
@@ -47,3 +48,13 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+# Check for Streamlit Cloud secrets fallback
+if not settings.GEMINI_API_KEY:
+    try:
+        import streamlit as st
+        if hasattr(st, "secrets") and "GEMINI_API_KEY" in st.secrets:
+            settings.GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
+            settings.GOOGLE_API_KEY = st.secrets["GEMINI_API_KEY"]
+    except Exception:
+        pass
